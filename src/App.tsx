@@ -1,11 +1,14 @@
 import React from 'react';
-import { Baby, Calendar, Clock, User, X } from 'lucide-react';
+import { Baby, Calendar, Clock, User, X, Cat } from 'lucide-react';
 import { cn } from './lib/utils';
+import { CameraFeed } from './components/CameraFeed';
 
 interface ChildCardProps {
   name: string;
   birthDate: string;
   birthTime: string;
+  cameraDeviceId?: string;
+  cameraFeedUrl?: string;
 }
 
 function formatDate(date: string): string {
@@ -64,7 +67,7 @@ function AgeCounter({ birthDate, birthTime }: { birthDate: string; birthTime: st
   );
 }
 
-function ChildCard({ name, birthDate, birthTime }: ChildCardProps) {
+function ChildCard({ name, birthDate, birthTime, cameraDeviceId, cameraFeedUrl }: ChildCardProps) {
   const formattedTime = new Date(`2000-01-01T${birthTime}`).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
@@ -76,7 +79,7 @@ function ChildCard({ name, birthDate, birthTime }: ChildCardProps) {
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">
           {name === "Hunter" ? (
-            <User className="w-8 h-8 text-primary" />
+            <Cat className="w-8 h-8 text-primary" />
           ) : (
             <Baby className="w-8 h-8 text-primary" />
           )}
@@ -91,6 +94,13 @@ function ChildCard({ name, birthDate, birthTime }: ChildCardProps) {
         </div>
 
         <AgeCounter birthDate={birthDate} birthTime={birthTime} />
+
+        {(cameraDeviceId || cameraFeedUrl) && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Live Camera</h3>
+            <CameraFeed deviceId={cameraDeviceId || ''} feedUrl={cameraFeedUrl} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -591,7 +601,11 @@ function MilestonePopup({ milestone, onClose }: { milestone: MilestoneInfo; onCl
       <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-primary">{milestone.title}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-gray-100 rounded-full"
+            aria-label="Close milestone details"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -732,12 +746,16 @@ function App() {
     {
       name: "Hunter",
       birthDate: "2021-09-07",
-      birthTime: "06:36"
+      birthTime: "06:36",
+      cameraDeviceId: "bf30b4eb13458bcfe1aixu",
+      cameraFeedUrl: undefined
     },
     {
       name: "Casper",
       birthDate: "2024-06-03",
-      birthTime: "09:04"
+      birthTime: "09:04",
+      cameraDeviceId: undefined,
+      cameraFeedUrl: undefined
     },
   ];
 
@@ -747,9 +765,7 @@ function App() {
       {children.map((child, index) => (
         <ChildCard
           key={index}
-          name={child.name}
-          birthDate={child.birthDate}
-          birthTime={child.birthTime}
+          {...child}
         />
       ))}
       <Timeline>{children}</Timeline>
